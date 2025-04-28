@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Reserva{% endblock %}
+{% block header %}Nova Reserva{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('nova_reserva') }}">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Dados do Cliente</h5>
+                    <div class="mb-3">
+                        <label for="cliente_nome" class="form-label">Nome Completo</label>
+                        <input type="text" class="form-control" id="cliente_nome" name="cliente_nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cliente_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="cliente_email" name="cliente_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cliente_telefone" class="form-label">Telefone</label>
+                        <input type="tel" class="form-control" id="cliente_telefone" name="cliente_telefone" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="mb-3">Detalhes da Reserva</h5>
+                    <div class="mb-3">
+                        <label for="barraca_id" class="form-label">Barraca</label>
+                        <select class="form-select" id="barraca_id" name="barraca_id" required>
+                            <option value="">Selecione uma barraca...</option>
+                            {% for barraca in barracas %}
+                            <option value="{{ barraca.id }}" data-preco="{{ barraca.preco_diaria }}">
+                                {{ barraca.codigo }} - {{ barraca.tipo }} (R$ {{ "%.2f"|format(barraca.preco_diaria) }}/noite)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="data_inicio" class="form-label">Check-in</label>
+                            <input type="date" class="form-control" id="data_inicio" name="data_inicio" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="data_fim" class="form-label">Check-out</label>
+                            <input type="date" class="form-control" id="data_fim" name="data_fim" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="adultos" class="form-label">Adultos</label>
+                            <input type="number" class="form-control" id="adultos" name="adultos" min="1" value="1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="criancas" class="form-label">Crianças</label>
+                            <input type="number" class="form-control" id="criancas" name="criancas" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Resumo Financeiro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Diárias</label>
+                                <input type="text" class="form-control" id="diarias" readonly value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Valor por Noite</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="text" class="form-control" id="valor_noite" readonly value="0.00">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Valor Total</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="text" class="form-control" id="valor_total" readonly value="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <a href="{{ url_for('listar_reservas') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Confirmar Reserva</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Cálculo automático do valor da reserva
+    document.addEventListener('DOMContentLoaded', function() {
+        const barracaSelect = document.getElementById('barraca_id');
+        const dataInicio = document.getElementById('data_inicio');
+        const dataFim = document.getElementById('data_fim');
+        const adultos = document.getElementById('adultos');
+        const criancas = document.getElementById('criancas');
+        const diarias = document.getElementById('diarias');
+        const valorNoite = document.getElementById('valor_noite');
+        const valorTotal = document.getElementById('valor_total');
+
+        function calcularReserva() {
+            if (barracaSelect.value && dataInicio.value && dataFim.value) {
+                const precoDiaria = parseFloat(barracaSelect.selectedOptions[0].dataset.preco || 0);
+                const inicio = new Date(dataInicio.value);
+                const fim = new Date(dataFim.value);
+                const numDiarias = Math.ceil((fim - inicio) / (1000 * 60 * 60 * 24));
+                const numAdultos = parseInt(adultos.value) || 0;
+                const numCriancas = parseInt(criancas.value) || 0;
+                const valorPorNoite = precoDiaria * (numAdultos + numCriancas * 0.5);
+                const total = valorPorNoite * numDiarias;
+
+                diarias.value = numDiarias;
+                valorNoite.value = valorPorNoite.toFixed(2);
+                valorTotal.value = total.toFixed(2);
+            } else {
+                diarias.value = '0';
+                valorNoite.value = '0.00';
+                valorTotal.value = '0.00';
+            }
+        }
+
+        barracaSelect.addEventListener('change', calcularReserva);
+        dataInicio.addEventListener('change', calcularReserva);
+        dataFim.addEventListener('change', calcularReserva);
+        adultos.addEventListener('change', calcularReserva);
+        criancas.addEventListener('change', calcularReserva);
+
+        // Definir data mínima (hoje)
+        const today = new Date().toISOString().split('T')[0];
+        dataInicio.min = today;
+        dataInicio.value = today;
+        
+        dataInicio.addEventListener('change', function() {
+            dataFim.min = this.value;
+            if (dataFim.value && dataFim.value < this.value) {
+                dataFim.value = this.value;
+            }
+            calcularReserva();
+        });
+    });
+</script>
+{% endblock %}

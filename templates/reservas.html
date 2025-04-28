@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Reservas{% endblock %}
+{% block header %}Reservas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <a href="{{ url_for('nova_reserva') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nova Reserva
+    </a>
+    <div class="input-group" style="width: 300px;">
+        <input type="text" class="form-control" placeholder="Pesquisar...">
+        <button class="btn btn-outline-secondary" type="button">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Contato</th>
+                        <th>Barraca</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Hóspedes</th>
+                        <th>Valor Total</th>
+                        <th>Pago</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                    <tr>
+                        <td>{{ reserva.id }}</td>
+                        <td>{{ reserva.cliente_nome }}</td>
+                        <td>
+                            <small>{{ reserva.cliente_email }}<br>
+                            {{ reserva.cliente_telefone }}</small>
+                        </td>
+                        <td>{{ reserva.barraca.codigo }} ({{ reserva.barraca.tipo }})</td>
+                        <td>{{ reserva.data_inicio.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ reserva.data_fim.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ reserva.adultos }}A / {{ reserva.criancas }}C</td>
+                        <td>R$ {{ "%.2f"|format(reserva.valor_total) }}</td>
+                        <td>R$ {{ "%.2f"|format(reserva.valor_pago) }}</td>
+                        <td>
+                            <span class="badge bg-{% if reserva.status == 'confirmada' %}success{% elif reserva.status == 'cancelada' %}danger{% else %}warning{% endif %}">
+                                {{ reserva.status|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('pagamentos', reserva_id=reserva.id) }}" class="btn btn-outline-primary" title="Pagamentos">
+                                    <i class="bi bi-cash"></i>
+                                </a>
+                                <button class="btn btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Cancelar">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

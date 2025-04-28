@@ -1,0 +1,50 @@
+-- Criar o banco de dados (se estiver usando SQLite direto, você pode pular esta linha)
+-- CREATE DATABASE reservas;
+
+-- Tabela de usuários
+CREATE TABLE usuario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    senha TEXT NOT NULL,
+    admin BOOLEAN DEFAULT 0
+);
+
+-- Tabela de barracas
+CREATE TABLE barraca (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo TEXT NOT NULL UNIQUE,
+    tipo TEXT NOT NULL,
+    capacidade INTEGER NOT NULL,
+    preco_diaria REAL NOT NULL,
+    disponivel BOOLEAN DEFAULT 1
+);
+
+-- Tabela de reservas
+CREATE TABLE reserva (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_nome TEXT NOT NULL,
+    cliente_email TEXT NOT NULL,
+    cliente_telefone TEXT NOT NULL,
+    barraca_id INTEGER NOT NULL,
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    adultos INTEGER NOT NULL,
+    criancas INTEGER DEFAULT 0,
+    valor_total REAL NOT NULL,
+    valor_pago REAL DEFAULT 0,
+    status TEXT DEFAULT 'pendente',
+    data_reserva DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (barraca_id) REFERENCES barraca(id)
+);
+
+-- Tabela de pagamentos
+CREATE TABLE pagamento (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reserva_id INTEGER NOT NULL,
+    valor REAL NOT NULL,
+    data_pagamento DATETIME DEFAULT CURRENT_TIMESTAMP,
+    metodo TEXT NOT NULL,
+    observacoes TEXT,
+    FOREIGN KEY (reserva_id) REFERENCES reserva(id)
+);

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Estoque de Barracas{% endblock %}
+{% block header %}Estoque de Barracas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAdicionarBarraca">
+        <i class="bi bi-plus-circle"></i> Adicionar Barraca
+    </button>
+    <div class="input-group" style="width: 300px;">
+        <input type="text" class="form-control" placeholder="Pesquisar...">
+        <button class="btn btn-outline-secondary" type="button">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Tipo</th>
+                        <th>Capacidade</th>
+                        <th>Preço Diária</th>
+                        <th>Disponibilidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for barraca in barracas %}
+                    <tr>
+                        <td>{{ barraca.codigo }}</td>
+                        <td>{{ barraca.tipo }}</td>
+                        <td>{{ barraca.capacidade }} pessoas</td>
+                        <td>R$ {{ "%.2f"|format(barraca.preco_diaria) }}</td>
+                        <td>
+                            {% if barraca.disponivel %}
+                            <span class="badge bg-success">Disponível</span>
+                            {% else %}
+                            <span class="badge bg-danger">Indisponível</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" title="Remover">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar Barraca -->
+<div class="modal fade" id="modalAdicionarBarraca" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Nova Barraca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="#">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="codigo" class="form-label">Código</label>
+                        <input type="text" class="form-control" id="codigo" name="codigo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="Individual">Individual</option>
+                            <option value="Casal">Casal</option>
+                            <option value="Familiar">Familiar</option>
+                            <option value="Luxo">Luxo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="capacidade" class="form-label">Capacidade</label>
+                        <input type="number" class="form-control" id="capacidade" name="capacidade" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="preco_diaria" class="form-label">Preço Diária (R$)</label>
+                        <input type="number" step="0.01" class="form-control" id="preco_diaria" name="preco_diaria" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

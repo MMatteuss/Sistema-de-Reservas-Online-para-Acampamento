@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Pagamentos - Reserva #{{ reserva.id }}{% endblock %}
+{% block header %}Pagamentos - Reserva #{{ reserva.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Detalhes da Reserva</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Cliente:</dt>
+                    <dd class="col-sm-8">{{ reserva.cliente_nome }}</dd>
+
+                    <dt class="col-sm-4">Contato:</dt>
+                    <dd class="col-sm-8">{{ reserva.cliente_telefone }}<br>{{ reserva.cliente_email }}</dd>
+
+                    <dt class="col-sm-4">Barraca:</dt>
+                    <dd class="col-sm-8">{{ reserva.barraca.codigo }} ({{ reserva.barraca.tipo }})</dd>
+
+                    <dt class="col-sm-4">Período:</dt>
+                    <dd class="col-sm-8">{{ reserva.data_inicio.strftime('%d/%m/%Y') }} a {{ reserva.data_fim.strftime('%d/%m/%Y') }}</dd>
+
+                    <dt class="col-sm-4">Hóspedes:</dt>
+                    <dd class="col-sm-8">{{ reserva.adultos }} adultos, {{ reserva.criancas }} crianças</dd>
+
+                    <dt class="col-sm-4">Valor Total:</dt>
+                    <dd class="col-sm-8">R$ {{ "%.2f"|format(reserva.valor_total) }}</dd>
+
+                    <dt class="col-sm-4">Valor Pago:</dt>
+                    <dd class="col-sm-8">R$ {{ "%.2f"|format(reserva.valor_pago) }}</dd>
+
+                    <dt class="col-sm-4">Saldo:</dt>
+                    <dd class="col-sm-8">
+                        R$ {{ "%.2f"|format(reserva.valor_total - reserva.valor_pago) }}
+                        <span class="badge bg-{% if reserva.valor_pago >= reserva.valor_total %}success{% else %}danger{% endif %}">
+                            {% if reserva.valor_pago >= reserva.valor_total %}Quitado{% else %}Pendente{% endif %}
+                        </span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Registrar Pagamento</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('pagamentos', reserva_id=reserva.id) }}">
+                    <div class="mb-3">
+                        <label for="valor" class="form-label">Valor (R$)</label>
+                        <input type="number" step="0.01" class="form-control" id="valor" name="valor" 
+                               max="{{ "%.2f"|format(reserva.valor_total - reserva.valor_pago) }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="metodo" class="form-label">Método de Pagamento</label>
+                        <select class="form-select" id="metodo" name="metodo" required>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="PIX">PIX</option>
+                            <option value="Transferência">Transferência Bancária</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Registrar Pagamento
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title">Histórico de Pagamentos</h5>
+            </div>
+            <div class="card-body">
+                {% if reserva.pagamentos %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Observações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pagamento in reserva.pagamentos|sort(attribute='data_pagamento', reverse=True) %}
+                            <tr>
+                                <td>{{ pagamento.data_pagamento.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>R$ {{ "%.2f"|format(pagamento.valor) }}</td>
+                                <td>{{ pagamento.metodo }}</td>
+                                <td>{{ pagamento.observacoes or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">Nenhum pagamento registrado para esta reserva.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

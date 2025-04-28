@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card-counter primary">
+            <i class="bi bi-calendar-check"></i>
+            <span class="count-numbers">{{ reservas|length }}</span>
+            <span class="count-name">Reservas Hoje</span>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card-counter success">
+            <i class="bi bi-shop"></i>
+            <span class="count-numbers">{{ barracas_disponiveis }}</span>
+            <span class="count-name">Barracas Disponíveis</span>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card-counter info">
+            <i class="bi bi-currency-dollar"></i>
+            <span class="count-numbers">R$ 5.280,00</span>
+            <span class="count-name">Receita Hoje</span>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="card-title">Últimas Reservas</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Barraca</th>
+                        <th>Período</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                    <tr>
+                        <td>{{ reserva.id }}</td>
+                        <td>{{ reserva.cliente_nome }}</td>
+                        <td>{{ reserva.barraca.codigo }}</td>
+                        <td>{{ reserva.data_inicio.strftime('%d/%m/%Y') }} - {{ reserva.data_fim.strftime('%d/%m/%Y') }}</td>
+                        <td>R$ {{ "%.2f"|format(reserva.valor_total) }}</td>
+                        <td>
+                            <span class="badge bg-{% if reserva.status == 'confirmada' %}success{% elif reserva.status == 'cancelada' %}danger{% else %}warning{% endif %}">
+                                {{ reserva.status|title }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
